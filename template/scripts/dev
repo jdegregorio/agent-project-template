@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/common.sh
+source "$script_dir/lib/common.sh"
+
+hook_status=0
+run_project_hook dev "$@" || hook_status=$?
+
+if [[ "$hook_status" -eq 2 ]]; then
+  fail "local development is not configured; add executable scripts/project/dev"
+fi
+exit "$hook_status"

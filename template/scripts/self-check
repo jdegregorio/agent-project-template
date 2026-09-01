@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/common.sh
+source "$script_dir/lib/common.sh"
+
+required_files=(
+  AGENTS.md
+  README.md
+  docs/architecture.md
+  docs/operations.md
+  openspec/config.yaml
+  openspec/specs/README.md
+  openspec/changes/README.md
+  scripts/check
+  scripts/dev
+  scripts/test
+)
+
+for required_file in "${required_files[@]}"; do
+  [[ -f "$project_root/$required_file" ]] || fail "required file is missing: $required_file"
+done
+
+executable_scripts=(
+  scripts/check
+  scripts/dev
+  scripts/self-check
+  scripts/test
+)
+
+for executable_script in "${executable_scripts[@]}"; do
+  [[ -x "$project_root/$executable_script" ]] || fail "script is not executable: $executable_script"
+done
+
+bash -n \
+  "$project_root/scripts/check" \
+  "$project_root/scripts/dev" \
+  "$project_root/scripts/lib/common.sh" \
+  "$project_root/scripts/self-check" \
+  "$project_root/scripts/test"
+
+git_top_level=""
+if command -v git >/dev/null 2>&1; then
+  git_top_level="$(git -C "$project_root" rev-parse --show-toplevel 2>/dev/null || true)"
+fi
+
+if [[ "$git_top_level" == "$project_root" ]]; then
+  tracked_environment_files="$(git -C "$project_root" ls-files | awk '/^\.env($|\.)/ && $0 != ".env.example" { print }')"
+  if [[ -n "$tracked_environment_files" ]]; then
+    printf '%s\n' "$tracked_environment_files" >&2
+    fail "local environment files are tracked"
+  fi
+
+  git -C "$project_root" diff --check
+fi
+
+note "Project contract checks passed."
