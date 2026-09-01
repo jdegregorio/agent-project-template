@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/common.sh
+source "$script_dir/lib/common.sh"
+
+hook_status=0
+run_project_hook test "$@" || hook_status=$?
+
+if [[ "$hook_status" -eq 2 ]]; then
+  note "No project test adapter configured; skipping project tests."
+  exit 0
+fi
+exit "$hook_status"

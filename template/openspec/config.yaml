@@ -1,0 +1,29 @@
+schema: spec-driven
+
+context: |
+  This repository uses a language-neutral project contract.
+  Read README.md for purpose, docs/architecture.md for system boundaries,
+  and docs/operations.md for runtime and deployment facts.
+  Put observable product behavior in specs and implementation choices in design.md.
+  Run ./scripts/check before claiming implementation is complete.
+
+rules:
+  proposal:
+    - State the user-facing problem, intended outcome, and explicit non-goals.
+    - Identify affected capabilities and compatibility or migration impact.
+  specs:
+    - Express requirements as observable behavior with concrete success and failure scenarios.
+    - Avoid prescribing an implementation unless it is part of the external contract.
+  design:
+    - Explain key choices, alternatives, risks, and affected architecture boundaries.
+    - Include rollout and rollback plans when the change affects persistent data or production operation.
+  tasks:
+    - Include requirement-driven tests and updates to authoritative project knowledge.
+    - End implementation work with ./scripts/check.
+
+operations:
+  apply:
+    - Preserve unrelated changes and report blockers instead of weakening validation.
+    - Do not mark implementation complete until ./scripts/check passes.
+  archive:
+    - Confirm current specs, architecture, operations, and decision records reflect the completed change.

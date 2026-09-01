@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/common.sh
+source "$script_dir/lib/common.sh"
+
+"$script_dir/self-check"
+"$script_dir/test"
+
+hook_status=0
+run_project_hook check "$@" || hook_status=$?
+
+if [[ "$hook_status" -eq 2 ]]; then
+  note "No project check adapter configured; base contract validation is complete."
+  exit 0
+fi
+if [[ "$hook_status" -ne 0 ]]; then
+  exit "$hook_status"
+fi
+
+note "All checks passed."
